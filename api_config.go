@@ -21,6 +21,7 @@ func newAPIConfig(
 	duration int,
 	body string,
 	timeOut int,
+	finalStatusChan chan *APIStatus,
 ) *APIConfig {
 	return &APIConfig{
 		ConcurrentConnections: goroutines,
@@ -30,6 +31,6 @@ func newAPIConfig(
 		duration:              duration,
 		body:                  body,
 		timeOut:               timeOut,
-		finalStatus:           make(chan *APIStatus),
+		finalStatus:           finalStatusChan,
 	}
 }

@@ -28,7 +28,7 @@ func (conf *APIConfig) request() {
 		log.Fatal(err)
 	}
 	start := time.Now()
-	for time.Since(start).Minutes() <= float64(conf.duration) && atomic.LoadInt32(&conf.interrupt) == 0 {
+	for time.Since(start).Seconds() <= float64(conf.duration) && atomic.LoadInt32(&conf.interrupt) == 0 {
 		reqDuration, respSize := run(
 			client,
 			conf.method,
@@ -56,7 +56,6 @@ func run(httpClient *http.Client, method, url, requestBody string, header map[st
 	if len(requestBody) > 0 {
 		buffer = bytes.NewBufferString(requestBody)
 	}
-
 	req, err := http.NewRequest(method, url, buffer)
 	if err != nil {
 		fmt.Println("[Info] An error occured while creating a new http request", err)
@@ -96,13 +95,12 @@ func run(httpClient *http.Client, method, url, requestBody string, header map[st
 
 func newHTTPClient(timeOut int) (*http.Client, error) {
 	client := &http.Client{}
-	to := time.Second * time.Duration(timeOut)
 	client.Transport = &http.Transport{
-		ResponseHeaderTimeout: to,
+		ResponseHeaderTimeout: time.Millisecond * time.Duration(timeOut),
 	}
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return errors.New("url redirection not allowed")
 	}
-	// client.CloseIdleConnections()
+	client.CloseIdleConnections()
 	return client, nil
 }

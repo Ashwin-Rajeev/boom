@@ -24,13 +24,13 @@ var (
 )
 
 func init() {
-	flag.IntVar(&numberOfConcurrentConnections, "-g", 5, "Number of concurrent connections")
-	flag.StringVar(&requestMethod, "-m", "GET", "Request method")
-	flag.StringVar(&headerValues, "-h", "", "header values seperated with ','")
-	flag.StringVar(&requestBody, "-b", "", "Request body file name (Relative path)")
-	flag.IntVar(&requestDurationInSeconds, "-d", 5, "Request duration")
-	flag.IntVar(&requestTimeOut, "-to", 10, "Request time out in seconds")
-	flag.BoolVar(&help, "-help", false, "know more about the usage of api-profiler")
+	flag.IntVar(&numberOfConcurrentConnections, "g", 5, "Number of concurrent connections")
+	flag.StringVar(&requestMethod, "m", "GET", "Request method")
+	flag.StringVar(&headerValues, "h", "", "header values seperated with ','")
+	flag.StringVar(&requestBody, "b", "", "Request body file name (Relative path)")
+	flag.IntVar(&requestDurationInSeconds, "d", 5, "Request duration")
+	flag.IntVar(&requestTimeOut, "to", 1000, "Request time out in seconds")
+	flag.BoolVar(&help, "help", false, "know more about the usage of api-profiler")
 }
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 	flag.Parse()
 	if !flag.Parsed() {
 		log.Fatalln("[Info] Command line flags parsing failed, Please check the input")
-	} 
+	}
 	requestHeader = make(map[string]string)
 	if headerValues != "" {
 		hv := strings.Split(headerValues, ",")
@@ -69,7 +69,7 @@ func main() {
 	if len(requestURL) == 0 {
 		log.Fatalln("[Info] request url is invalid, Please check the input")
 	}
-
+	staticsChan := make(chan *APIStatus, numberOfConcurrentConnections)
 	config := newAPIConfig(
 		numberOfConcurrentConnections,
 		requestURL,
@@ -78,8 +78,10 @@ func main() {
 		requestDurationInSeconds,
 		requestBody,
 		requestTimeOut,
+		staticsChan,
 	)
-
+	fmt.Printf("✔ API-profiler running for %vs over the api: %v ✔\n", requestDurationInSeconds, requestURL)
+	fmt.Printf("\t☺ %v goroutines running concurrently! Stay alert ☺\n\n", numberOfConcurrentConnections)
 	for i := 0; i < numberOfConcurrentConnections; i++ {
 		go config.request()
 	}
@@ -90,12 +92,13 @@ func main() {
 		MinRequestTime: time.Minute,
 		MaxRequestTime: time.Minute,
 	}
-	staticsChan := make(chan *APIStatus, numberOfConcurrentConnections)
 	for minions < numberOfConcurrentConnections {
 		select {
 		case <-sigChannel:
 			config.stop()
 			fmt.Println("[Info] Api-profiler shutting down...")
+			os.Exit(0)
+
 		case s := <-staticsChan:
 			statics.NumberOfRequests += s.NumberOfRequests
 			statics.ErrorCount += s.ErrorCount
@@ -110,9 +113,12 @@ func main() {
 		fmt.Println("[Info] No request found")
 		return
 	}
-	fmt.Printf("[Info] Total Response size:\t%v\n", statics.TotalResponseSize)
-	fmt.Printf("[Info] Total Requests:\t%v\n", statics.NumberOfRequests)
-	fmt.Printf("[Info] Fastest Request:\t%v\n", statics.MinRequestTime)
-	fmt.Printf("[Info] Slowest Request:\t%v\n", statics.MaxRequestTime)
-	fmt.Printf("[Info] Number of Errors:\t%v\n", statics.ErrorCount)
+	avgReqTime := statics.TotalDuration / time.Duration(statics.NumberOfRequests)
+
+	fmt.Printf("❤ [Info]❤ Total Memory Read:\t%v Bytes\n", statics.TotalResponseSize)
+	fmt.Printf("❤ [Info]❤ Total Requests:\t%v\n", statics.NumberOfRequests)
+	fmt.Printf("❤ [Info]❤ Fastest Request:\t%v\n", statics.MinRequestTime)
+	fmt.Printf("❤ [Info]❤ Slowest Request:\t%v\n", statics.MaxRequestTime)
+	fmt.Printf("❤ [Info]❤ Average Request Time:\t%v\n", avgReqTime)
+	fmt.Printf("❤ [Info]❤ Number of Errors:\t%v\n", statics.ErrorCount)
 }
