@@ -9,6 +9,8 @@ type APIConfig struct {
 	duration              int
 	body                  string
 	timeOut               int
+	finalStatus           chan *APIStatus
+	interrupt             int32
 }
 
 func newAPIConfig(
@@ -22,11 +24,12 @@ func newAPIConfig(
 ) *APIConfig {
 	return &APIConfig{
 		ConcurrentConnections: goroutines,
-		url:      url,
-		method:   method,
-		header:   header,
-		duration: duration,
-		body:     body,
-		timeOut:  timeOut,
+		url:                   url,
+		method:                method,
+		header:                header,
+		duration:              duration,
+		body:                  body,
+		timeOut:               timeOut,
+		finalStatus:           make(chan *APIStatus),
 	}
 }

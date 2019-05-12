@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"time"
 )
 
 var (
@@ -23,23 +24,22 @@ var (
 )
 
 func init() {
-	sigChannel := make(chan os.Signal, 1)
-	signal.Notify(sigChannel, os.Interrupt)
-
 	flag.IntVar(&numberOfConcurrentConnections, "-g", 5, "Number of concurrent connections")
 	flag.StringVar(&requestMethod, "-m", "GET", "Request method")
 	flag.StringVar(&headerValues, "-h", "", "header values seperated with ','")
 	flag.StringVar(&requestBody, "-b", "", "Request body file name (Relative path)")
 	flag.IntVar(&requestDurationInSeconds, "-d", 5, "Request duration")
-	flag.IntVar(&requestTimeOut, "-to", 100, "Request time out in seconds")
+	flag.IntVar(&requestTimeOut, "-to", 10, "Request time out in seconds")
 	flag.BoolVar(&help, "-help", false, "know more about the usage of api-profiler")
 }
 
 func main() {
+	sigChannel := make(chan os.Signal, 1)
+	signal.Notify(sigChannel, os.Interrupt)
 	flag.Parse()
 	if !flag.Parsed() {
 		log.Fatalln("[Info] Command line flags parsing failed, Please check the input")
-	}
+	} 
 	requestHeader = make(map[string]string)
 	if headerValues != "" {
 		hv := strings.Split(headerValues, ",")
@@ -64,6 +64,11 @@ func main() {
 		}
 		requestBody = string(data)
 	}
+	requestURL = flag.Arg(0)
+
+	if len(requestURL) == 0 {
+		log.Fatalln("[Info] request url is invalid, Please check the input")
+	}
 
 	config := newAPIConfig(
 		numberOfConcurrentConnections,
@@ -78,4 +83,36 @@ func main() {
 	for i := 0; i < numberOfConcurrentConnections; i++ {
 		go config.request()
 	}
+
+	minions := 0
+	statics := APIStatus{
+		TotalDuration:  time.Minute,
+		MinRequestTime: time.Minute,
+		MaxRequestTime: time.Minute,
+	}
+	staticsChan := make(chan *APIStatus, numberOfConcurrentConnections)
+	for minions < numberOfConcurrentConnections {
+		select {
+		case <-sigChannel:
+			config.stop()
+			fmt.Println("[Info] Api-profiler shutting down...")
+		case s := <-staticsChan:
+			statics.NumberOfRequests += s.NumberOfRequests
+			statics.ErrorCount += s.ErrorCount
+			statics.TotalDuration += s.TotalDuration
+			statics.MaxRequestTime = s.MaxRequestTime
+			statics.MinRequestTime = s.MinRequestTime
+			statics.TotalResponseSize = s.TotalResponseSize
+			minions++
+		}
+	}
+	if statics.NumberOfRequests == 0 {
+		fmt.Println("[Info] No request found")
+		return
+	}
+	fmt.Printf("[Info] Total Response size:\t%v\n", statics.TotalResponseSize)
+	fmt.Printf("[Info] Total Requests:\t%v\n", statics.NumberOfRequests)
+	fmt.Printf("[Info] Fastest Request:\t%v\n", statics.MinRequestTime)
+	fmt.Printf("[Info] Slowest Request:\t%v\n", statics.MaxRequestTime)
+	fmt.Printf("[Info] Number of Errors:\t%v\n", statics.ErrorCount)
 }
