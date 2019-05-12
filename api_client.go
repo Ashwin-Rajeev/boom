@@ -12,11 +12,6 @@ import (
 	"time"
 )
 
-// var (
-// 	requestDuration time.Duration
-// 	responseSize    int
-// )
-
 func (conf *APIConfig) request() {
 	status := &APIStatus{
 		TotalDuration:  time.Minute,
