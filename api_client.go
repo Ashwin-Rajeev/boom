@@ -16,7 +16,6 @@ func (conf *APIConfig) request() {
 	status := &APIStatus{
 		TotalDuration:  time.Minute,
 		MinRequestTime: time.Minute,
-		MaxRequestTime: time.Minute,
 	}
 	client, err := newHTTPClient(conf.timeOut)
 	if err != nil {
