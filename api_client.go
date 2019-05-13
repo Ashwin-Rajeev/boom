@@ -96,6 +96,5 @@ func newHTTPClient(timeOut int) (*http.Client, error) {
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return errors.New("url redirection not allowed")
 	}
-	client.CloseIdleConnections()
 	return client, nil
 }
