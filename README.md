@@ -2,7 +2,7 @@
 Golang package for testing the REST api
 
 # Installing
-go get github.com/Ashwin-Rajeev/api-profiler
+> go get github.com/Ashwin-Rajeev/api-profiler
 
 # Usage
 
