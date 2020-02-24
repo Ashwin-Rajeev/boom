@@ -9,6 +9,8 @@ import (
 	"os/signal"
 	"strings"
 	"time"
+
+	clr "github.com/fatih/color"
 )
 
 var (
@@ -26,10 +28,10 @@ var (
 func init() {
 	flag.IntVar(&numberOfConcurrentConnections, "g", 5, "Number of concurrent connections")
 	flag.StringVar(&requestMethod, "m", "GET", "Request method")
-	flag.StringVar(&headerValues, "h", "", "header values seperated with ','")
+	flag.StringVar(&headerValues, "h", "", "header values seperated with ';'")
 	flag.StringVar(&requestBody, "b", "", "Request body file name (Relative path)")
 	flag.IntVar(&requestDurationInSeconds, "d", 5, "Request duration")
-	flag.IntVar(&requestTimeOut, "to", 1000, "Request time out in seconds")
+	flag.IntVar(&requestTimeOut, "to", 2000, "Request time out in seconds")
 	flag.BoolVar(&help, "help", false, "know more about the usage of api-profiler")
 }
 
@@ -80,8 +82,12 @@ func main() {
 		requestTimeOut,
 		staticsChan,
 	)
-	fmt.Printf("✔ API-profiler running for %vs over the api: %v ✔\n", requestDurationInSeconds, requestURL)
-	fmt.Printf("\t☺ %v goroutines running concurrently! Stay alert ☺\n\n", numberOfConcurrentConnections)
+	fmt.Printf(" API-Profiler running for %vs over the api: ", requestDurationInSeconds)
+	clr.Set(clr.FgGreen)
+	fmt.Printf(" %v \n", requestURL)
+	clr.Unset()
+	fmt.Printf(" %v Active Concurrent connections!\n", numberOfConcurrentConnections)
+
 	for i := 0; i < numberOfConcurrentConnections; i++ {
 		go config.request()
 	}
@@ -91,12 +97,13 @@ func main() {
 		TotalDuration:  time.Minute,
 		MinRequestTime: time.Minute,
 		MaxRequestTime: time.Minute,
+		StatusCodes:    &StatusCodes{},
 	}
 	for minions < numberOfConcurrentConnections {
 		select {
 		case <-sigChannel:
 			config.stop()
-			fmt.Println("[Info] Api-profiler shutting down...")
+			// printResult(statics)
 			os.Exit(0)
 
 		case s := <-staticsChan:
@@ -106,6 +113,12 @@ func main() {
 			statics.MaxRequestTime = s.MaxRequestTime
 			statics.MinRequestTime = s.MinRequestTime
 			statics.TotalResponseSize = s.TotalResponseSize
+			statics.StatusCodes.OneXX += s.StatusCodes.OneXX
+			statics.StatusCodes.TwoXX += s.StatusCodes.TwoXX
+			statics.StatusCodes.ThreeXX += s.StatusCodes.ThreeXX
+			statics.StatusCodes.FourXX += s.StatusCodes.FourXX
+			statics.StatusCodes.FiveXX += s.StatusCodes.FiveXX
+			statics.StatusCodes.Others += s.StatusCodes.Others
 			minions++
 		}
 	}
@@ -113,12 +126,81 @@ func main() {
 		fmt.Println("[Info] No request found")
 		return
 	}
-	avgReqTime := statics.TotalDuration / time.Duration(statics.NumberOfRequests)
 
-	fmt.Printf("❤ [Info]❤ Total Memory Read:\t%v Bytes\n", statics.TotalResponseSize)
-	fmt.Printf("❤ [Info]❤ Total Requests:\t%v\n", statics.NumberOfRequests)
-	fmt.Printf("❤ [Info]❤ Fastest Request:\t%v\n", statics.MinRequestTime)
-	fmt.Printf("❤ [Info]❤ Slowest Request:\t%v\n", statics.MaxRequestTime)
-	fmt.Printf("❤ [Info]❤ Average Request Time:\t%v\n", avgReqTime)
-	fmt.Printf("❤ [Info]❤ Number of Errors:\t%v\n", statics.ErrorCount)
+	defer func() {
+		printResult(statics)
+	}()
+}
+
+// printResult out the result into console
+func printResult(statics APIStatus) {
+	if statics.NumberOfRequests == 0 {
+		statics.NumberOfRequests = 1
+	}
+	statics.AvgReqTime = statics.TotalDuration / time.Duration(statics.NumberOfRequests)
+	fmt.Printf("\n")
+	fmt.Printf(`|     Statistics     |     value     |`)
+	fmt.Printf("\n")
+	fmt.Printf(`| ================================== |`)
+	fmt.Printf("\n")
+	fmt.Printf(` + Total   Reqs`)
+	fmt.Printf("\t\t")
+	clr.Set(clr.FgGreen)
+	fmt.Printf(" %v \n", statics.NumberOfRequests)
+	clr.Unset()
+	fmt.Printf(" + Fastest Reqs\t\t")
+	clr.Set(clr.FgGreen)
+	fmt.Printf(" %v \n", statics.MinRequestTime)
+	clr.Unset()
+	fmt.Printf(" + Slowest Reqs\t\t")
+	clr.Set(clr.FgGreen)
+	fmt.Printf(" %v \n", statics.MaxRequestTime)
+	clr.Unset()
+	fmt.Printf(" + Average Reqs\t\t")
+	clr.Set(clr.FgGreen)
+	fmt.Printf(" %v \n", statics.AvgReqTime)
+	clr.Unset()
+	fmt.Printf(` + Error   Count`)
+	fmt.Printf(`        `)
+	clr.Set(clr.FgGreen)
+	fmt.Printf(" %v \n", statics.ErrorCount)
+	clr.Unset()
+	fmt.Printf(`― ― ― ― ― ― ― ― ― ― ―― ― ― ― ― ― ― ― ―`)
+	fmt.Printf("\n")
+	fmt.Printf(`|     Status Code    |     Count     |`)
+	fmt.Printf("\n")
+	fmt.Printf(`| ================================== |`)
+	fmt.Printf("\n")
+	fmt.Printf(` + 1XX`)
+	fmt.Printf(`                  `)
+	clr.Set(clr.FgGreen)
+	fmt.Printf(" %v \n", statics.StatusCodes.OneXX)
+	clr.Unset()
+	fmt.Printf(" + 2XX")
+	fmt.Printf(`                  `)
+	clr.Set(clr.FgGreen)
+	fmt.Printf(" %v \n", statics.StatusCodes.TwoXX)
+	clr.Unset()
+	fmt.Printf(" + 3XX")
+	fmt.Printf(`                  `)
+	clr.Set(clr.FgGreen)
+	fmt.Printf(" %v \n", statics.StatusCodes.ThreeXX)
+	clr.Unset()
+	fmt.Printf(" + 4XX")
+	fmt.Printf(`                  `)
+	clr.Set(clr.FgGreen)
+	fmt.Printf(" %v \n", statics.StatusCodes.FourXX)
+	clr.Unset()
+	fmt.Printf(" + 5XX")
+	fmt.Printf(`                  `)
+	clr.Set(clr.FgGreen)
+	fmt.Printf(" %v \n", statics.StatusCodes.FiveXX)
+	clr.Unset()
+	fmt.Printf(" + Others")
+	fmt.Printf(`               `)
+	clr.Set(clr.FgGreen)
+	fmt.Printf(" %v \n", statics.StatusCodes.Others)
+	clr.Unset()
+	fmt.Printf(`― ― ― ― ― ― ― ― ― ― ―― ― ― ― ― ― ― ― ―`)
+	fmt.Printf("\n")
 }

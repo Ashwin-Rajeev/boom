@@ -13,7 +13,19 @@ type APIStatus struct {
 	MaxRequestTime    time.Duration
 	NumberOfRequests  int
 	TotalResponseSize int64
+	AvgReqTime        time.Duration
 	ErrorCount        int
+	StatusCodes       *StatusCodes
+}
+
+// StatusCodes stores http status codes
+type StatusCodes struct {
+	OneXX   int
+	TwoXX   int
+	ThreeXX int
+	FourXX  int
+	FiveXX  int
+	Others  int
 }
 
 func headerSize(headers http.Header) (result int64) {

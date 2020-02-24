@@ -22,18 +22,24 @@ api-profiler -d 10 -g 5 https://www.google.com/
 
 ## output
 
-✔ API-profiler running for 10s over the api: https://www.google.com/ ✔
+ API-Profiler running for 10s over the api:  https://www.google.com/ 
+ 5 Active Concurrent connections!
 
-☺ 5 goroutines running concurrently! Stay alert ☺
+|     Statistics     |     value     |
+| ================================== |
+ + Total   Reqs          502 
+ + Fastest Reqs          83.435901ms 
+ + Slowest Reqs          262.846001ms 
+ + Average Reqs          817.296542ms 
+ + Error   Count         0 
+― ― ― ― ― ― ― ― ― ― ―― ― ― ― ― ― ― ― ―
+|     Status Code    |     Count     |
+| ================================== |
+ + 1XX                   0 
+ + 2XX                   502 
+ + 3XX                   0 
+ + 4XX                   0 
+ + 5XX                   0 
+ + Others                0 
+― ― ― ― ― ― ― ― ― ― ―― ― ― ― ― ― ― ― ―
 
-❤ [Info]❤ Total Memory Read:    137327 Bytes
-
-❤ [Info]❤ Total Requests:       34
-
-❤ [Info]❤ Fastest Request:      121.935ms
-
-❤ [Info]❤ Slowest Request:      1m0s
-
-❤ [Info]❤ Average Request Time: 10.992457138s
-
-❤ [Info]❤ Number of Errors:     41
