@@ -22,24 +22,25 @@ api-profiler -d 10 -g 5 https://www.google.com/
 
 ## output
 
- API-Profiler running for 10s over the api:  https://www.google.com/ 
- 5 Active Concurrent connections!
+<pre> API-Profiler running for 10s over the api: <font color="#4E9A06"> https://www.google.com/ </font>
+ 20 Active Concurrent connections!
 
 |     Statistics     |     value     |
 | ================================== |
- + Total   Reqs          502 
- + Fastest Reqs          83.435901ms 
- + Slowest Reqs          262.846001ms 
- + Average Reqs          817.296542ms 
- + Error   Count         0 
+ + Total   Reqs		<font color="#4E9A06"> 529 </font>
+ + Fastest Reqs		<font color="#4E9A06"> 267.343248ms </font>
+ + Slowest Reqs		<font color="#4E9A06"> 870.364788ms </font>
+ + Average Reqs		<font color="#4E9A06"> 2.766071181s </font>
+ + Error   Count        <font color="#4E9A06"> 0 </font>
 ― ― ― ― ― ― ― ― ― ― ―― ― ― ― ― ― ― ― ―
 |     Status Code    |     Count     |
 | ================================== |
- + 1XX                   0 
- + 2XX                   502 
- + 3XX                   0 
- + 4XX                   0 
- + 5XX                   0 
- + Others                0 
+ + 1XX                  <font color="#4E9A06"> 0 </font>
+ + 2XX                  <font color="#4E9A06"> 529 </font>
+ + 3XX                  <font color="#4E9A06"> 0 </font>
+ + 4XX                  <font color="#4E9A06"> 0 </font>
+ + 5XX                  <font color="#4E9A06"> 0 </font>
+ + Others               <font color="#4E9A06"> 0 </font>
 ― ― ― ― ― ― ― ― ― ― ―― ― ― ― ― ― ― ― ―
+</pre>
 
