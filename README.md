@@ -18,7 +18,7 @@ Usage: api-profiler <flags> <url>
 
 #  example
 
-api-profiler -d 10 -g 5 https://www.google.com/
+api-profiler -d 10 -g 20 https://www.google.com/
 
 ## output
 
