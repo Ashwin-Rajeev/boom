@@ -1,4 +1,4 @@
-# Boom
+# Boom [![Go Report Card](https://goreportcard.com/badge/github.com/Ashwin-Rajeev/boom)](https://goreportcard.com/report/github.com/Ashwin-Rajeev/boom)
 Boom is a HTTP(S) benchmarking tool written in Golang. Because of its lightning fast performance uyou cane test any real world applications using this wnderfull benchmarking tool.
 
 ### Coded With Language
