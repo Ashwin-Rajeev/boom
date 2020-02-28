@@ -24,7 +24,7 @@ Usage:  boom [<flags>] <url>
         -d       Request duration (Default value = 5)
         -g       Number of concurrent connections (Default value = 5)
         -b       Request body file name (Relative path) (Default value = )
-        -h       header values seperated with ';' (Default value = )
+        -h       header values separated with ';' (Default value = )
         -m       Request method (Default value = GET)
         -to      Request time out in seconds (Default value = 1000)
 
