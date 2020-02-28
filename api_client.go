@@ -54,7 +54,7 @@ func run(httpClient *http.Client, method, url, requestBody string, header map[st
 	}
 	req, err := http.NewRequest(method, url, buffer)
 	if err != nil {
-		fmt.Println("[Info] An error occured while creating a new http request", err)
+		fmt.Println("[Info] An error occurred while creating a new http request", err)
 		return
 	}
 
@@ -65,7 +65,7 @@ func run(httpClient *http.Client, method, url, requestBody string, header map[st
 	start := time.Now()
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		fmt.Println("[Info] An error occured while creating the request", err)
+		fmt.Println("[Info] An error occurred while creating the request", err)
 	}
 	if resp == nil {
 		fmt.Println("[Info] empty response")
@@ -73,7 +73,7 @@ func run(httpClient *http.Client, method, url, requestBody string, header map[st
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("[Info] An error occured while reading  response body", err)
+		fmt.Println("[Info] An error occurred while reading  response body", err)
 	}
 	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
 		requestDuration = time.Since(start)
