@@ -12,9 +12,9 @@ Boom is a HTTP(S) benchmarking tool written in Golang. Because of its lightning 
 ### Installing
 To get the latest and greatest run:
 
->
-> go get -u github.com/Ashwin-Rajeev/boom
->
+```
+go get -u github.com/Ashwin-Rajeev/boom
+```
 
 ## Usage
 ```
