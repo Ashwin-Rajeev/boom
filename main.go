@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cheggaaa/pb/v3"
 	clr "github.com/fatih/color"
 )
 
@@ -28,11 +29,11 @@ var (
 func init() {
 	flag.IntVar(&numberOfConcurrentConnections, "g", 5, "Number of concurrent connections")
 	flag.StringVar(&requestMethod, "m", "GET", "Request method")
-	flag.StringVar(&headerValues, "h", "", "header values seperated with ';'")
+	flag.StringVar(&headerValues, "h", "", "header values separated with ';'")
 	flag.StringVar(&requestBody, "b", "", "Request body file name (Relative path)")
 	flag.IntVar(&requestDurationInSeconds, "d", 5, "Request duration")
 	flag.IntVar(&requestTimeOut, "to", 2000, "Request time out in seconds")
-	flag.BoolVar(&help, "help", false, "know more about the usage of api-profiler")
+	flag.BoolVar(&help, "help", false, "know more about the usage of boom")
 }
 
 func main() {
@@ -44,14 +45,14 @@ func main() {
 	}
 	requestHeader = make(map[string]string)
 	if headerValues != "" {
-		hv := strings.Split(headerValues, ",")
+		hv := strings.Split(headerValues, ";")
 		for _, hd := range hv {
 			header := strings.SplitN(hd, ":", 2)
 			requestHeader[header[0]] = header[1]
 		}
 	}
 	if help {
-		fmt.Println("Usage: api-profiler <flags> <url>")
+		fmt.Println("Usage: boom [<flags>] <url>")
 		flag.VisitAll(func(flag *flag.Flag) {
 			fmt.Println("\t-"+flag.Name, "\t", flag.Usage, "(Default value = "+flag.DefValue+")")
 		})
@@ -69,7 +70,7 @@ func main() {
 	requestURL = flag.Arg(0)
 
 	if len(requestURL) == 0 {
-		log.Fatalln("[Info] request url is invalid, Please check the input")
+		log.Fatalln("[Info] Requested url is invalid, Please check the input")
 	}
 	staticsChan := make(chan *APIStatus, numberOfConcurrentConnections)
 	config := newAPIConfig(
@@ -82,11 +83,28 @@ func main() {
 		requestTimeOut,
 		staticsChan,
 	)
-	fmt.Printf(" API-Profiler running for %vs over the api: ", requestDurationInSeconds)
+	fmt.Printf(" Boom running for %vs over the api: ", requestDurationInSeconds)
 	clr.Set(clr.FgGreen)
 	fmt.Printf(" %v \n", requestURL)
 	clr.Unset()
 	fmt.Printf(" %v Active Concurrent connections!\n", numberOfConcurrentConnections)
+
+	// progressbar configuration
+	bar := pb.Simple.Start(requestDurationInSeconds)
+	go func(rd int, bar *pb.ProgressBar) {
+		d1, _ := time.ParseDuration(fmt.Sprintf("%vs", rd))
+		timeout := time.After(d1)
+		for {
+			select {
+			case <-timeout:
+				bar.Finish()
+				return
+			default:
+				bar.Increment()
+				time.Sleep(time.Second)
+			}
+		}
+	}(requestDurationInSeconds, bar)
 
 	for i := 0; i < numberOfConcurrentConnections; i++ {
 		go config.request()
@@ -103,7 +121,6 @@ func main() {
 		select {
 		case <-sigChannel:
 			config.stop()
-			// printResult(statics)
 			os.Exit(0)
 
 		case s := <-staticsChan:
