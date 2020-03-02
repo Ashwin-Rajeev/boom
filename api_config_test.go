@@ -34,7 +34,7 @@ func Test_newAPIConfig(t *testing.T) {
 				finalStatusChan: nil,
 			},
 			want: &APIConfig{
-				ConcurrentConnections: 10,
+				concurrentConnections: 10,
 				url:                   "www.sample.com",
 				method:                "POST",
 				header:                nil,

@@ -1,0 +1,25 @@
+[
+    {
+        "url": "http://www.sample.com",
+        "method": "GET",
+        "body": {
+            "a": "1",
+            "b": "2"
+        },
+        "header": {
+            "key": "value"
+        }
+    },
+    {
+        "url": "http://www.sample.com",
+        "method": "POST",
+        "body": {
+            "a": 1,
+            "b": 2
+        },
+        "header": {
+            "key1": "value1",
+            "key2": "value2"
+        }
+    }
+]
