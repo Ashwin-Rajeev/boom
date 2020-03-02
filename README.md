@@ -26,12 +26,14 @@ Usage:  boom [<flags>] <url>
         -b       Request body file name (Relative path) (Default value = )
         -h       header values separated with ';' (Default value = )
         -m       Request method (Default value = GET)
+        -mul     Use multiple request mode (Default value = false)
         -to      Request time out in seconds (Default value = 1000)
 
 ```
 
 ##  Example
-
+ 
+### Single request
 <pre>
 > boom -d 10 -g 20 https://www.google.com/
   Boom running for 10s over the api: <font color="#4E9A06"> https://www.google.com/ </font>
@@ -57,7 +59,87 @@ Usage:  boom [<flags>] <url>
 ― ― ― ― ― ― ― ― ― ― ―― ― ― ― ― ― ― ― ―
 </pre>
 
+### Single POST request with body
+<pre>
+> boom -d 10 -g 20 -m POST -b body.json https://www.sample.com/
+  Boom running for 10s over the api: <font color="#4E9A06"> https://www.google.com/ </font>
+  20 Active Concurrent connections!
+10 / 10 [--------------------------------------------------------------] 100.00%
 
+|     Statistics     |     value     |
+| ================================== |
+ + Total   Reqs		<font color="#4E9A06"> 1424 </font>
+ + Fastest Reqs		<font color="#4E9A06"> 128.59929ms </font>
+ + Slowest Reqs		<font color="#4E9A06"> 273.003861ms </font>
+ + Average Reqs		<font color="#4E9A06"> 1.026262071s </font>
+ + Error   Count        <font color="#4E9A06"> 0 </font>
+― ― ― ― ― ― ― ― ― ― ―― ― ― ― ― ― ― ― ―
+|     Status Code    |     Count     |
+| ================================== |
+ + 1XX                  <font color="#4E9A06"> 0 </font>
+ + 2XX                  <font color="#4E9A06"> 1600 </font>
+ + 3XX                  <font color="#4E9A06"> 0 </font>
+ + 4XX                  <font color="#4E9A06"> 0 </font>
+ + 5XX                  <font color="#4E9A06"> 0 </font>
+ + Others               <font color="#4E9A06"> 0 </font>
+― ― ― ― ― ― ― ― ― ― ―― ― ― ― ― ― ― ― ―
+</pre>
+
+### Multiple requests using multi request mode
+<pre>
+> boom  --mul -d 10 -g 20 -b body.json
+  Boom running for 10s over the api: <font color="#4E9A06"> https://www.google.com/ </font>
+  20 Active Concurrent connections!
+10 / 10 [--------------------------------------------------------------] 100.00%
+
+|     Statistics     |     value     |
+| ================================== |
+ + Total   Reqs		<font color="#4E9A06"> 1424 </font>
+ + Fastest Reqs		<font color="#4E9A06"> 128.59929ms </font>
+ + Slowest Reqs		<font color="#4E9A06"> 273.003861ms </font>
+ + Average Reqs		<font color="#4E9A06"> 1.026262071s </font>
+ + Error   Count        <font color="#4E9A06"> 0 </font>
+― ― ― ― ― ― ― ― ― ― ―― ― ― ― ― ― ― ― ―
+|     Status Code    |     Count     |
+| ================================== |
+ + 1XX                  <font color="#4E9A06"> 0 </font>
+ + 2XX                  <font color="#4E9A06"> 1600 </font>
+ + 3XX                  <font color="#4E9A06"> 0 </font>
+ + 4XX                  <font color="#4E9A06"> 0 </font>
+ + 5XX                  <font color="#4E9A06"> 0 </font>
+ + Others               <font color="#4E9A06"> 0 </font>
+― ― ― ― ― ― ― ― ― ― ―― ― ― ― ― ― ― ― ―
+</pre>
+
+sample_request.json
+```
+
+[
+    {
+        "url": "http://www.sample.com",
+        "method": "GET",
+        "body": {
+            "a": "1",
+            "b": "2"
+        },
+        "header": {
+            "key": "value"
+        }
+    },
+    {
+        "url": "http://www.sample.com",
+        "method": "POST",
+        "body": {
+            "a": 1,
+            "b": 2
+        },
+        "header": {
+            "key1": "value1",
+            "key2": "value2"
+        }
+    }
+]
+```
 ## Prerequisites
 
 Golang should be installed on your computer, boom is compatible with go1.10 and above

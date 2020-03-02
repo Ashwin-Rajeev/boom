@@ -13,6 +13,7 @@ import (
 )
 
 func (conf *APIConfig) request() {
+
 	status := &APIStatus{
 		TotalDuration:  time.Minute,
 		MinRequestTime: time.Minute,
@@ -23,45 +24,30 @@ func (conf *APIConfig) request() {
 		log.Fatal(err)
 	}
 	start := time.Now()
-	for time.Since(start).Seconds() <= float64(conf.duration) && atomic.LoadInt32(&conf.interrupt) == 0 {
-		reqDuration, respSize := run(
-			client,
-			conf.method,
-			conf.url,
-			conf.body,
-			conf.header,
-			status,
-		)
-		if respSize > 0 {
-			status.NumberOfRequests++
-			status.TotalResponseSize += int64(respSize)
-			status.TotalDuration += reqDuration
-			status.MaxRequestTime = findMaxRequestTime(reqDuration, status.MaxRequestTime)
-			status.MinRequestTime = findMinRequestTime(reqDuration, status.MinRequestTime)
-		} else {
-			status.ErrorCount++
+	finalConf, err := prepareRequest(conf)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for time.Since(start).Seconds() <= float64(finalConf.duration) && atomic.LoadInt32(&finalConf.interrupt) == 0 {
+		for _, val := range finalConf.params {
+			reqDuration, respSize := run(client, val.request, status)
+			if respSize > 0 {
+				status.NumberOfRequests++
+				status.TotalResponseSize += int64(respSize)
+				status.TotalDuration += reqDuration
+				status.MaxRequestTime = findMaxRequestTime(reqDuration, status.MaxRequestTime)
+				status.MinRequestTime = findMinRequestTime(reqDuration, status.MinRequestTime)
+			} else {
+				status.ErrorCount++
+			}
 		}
 	}
-	conf.finalStatus <- status
+	finalConf.finalStatus <- status
 }
 
-func run(httpClient *http.Client, method, url, requestBody string, header map[string]string, s *APIStatus) (requestDuration time.Duration, responseSize int) {
-	var buffer io.Reader
+func run(httpClient *http.Client, req *http.Request, s *APIStatus) (requestDuration time.Duration, responseSize int) {
 	requestDuration = -1
 	responseSize = -1
-	if len(requestBody) > 0 {
-		buffer = bytes.NewBufferString(requestBody)
-	}
-	req, err := http.NewRequest(method, url, buffer)
-	if err != nil {
-		fmt.Println("[Info] An error occurred while creating a new http request", err)
-		return
-	}
-
-	for headerKey, headerValue := range header {
-		req.Header.Add(headerKey, headerValue)
-	}
-
 	start := time.Now()
 	resp, err := httpClient.Do(req)
 	if err != nil {
@@ -116,4 +102,23 @@ func newHTTPClient(timeOut int) (*http.Client, error) {
 		return errors.New("url redirection not allowed")
 	}
 	return client, nil
+}
+
+func prepareRequest(conf *APIConfig) (*APIConfig, error) {
+	for _, val := range conf.params {
+		var buffer io.Reader
+		if len(val.jsonBody) > 0 {
+			buffer = bytes.NewBufferString(val.jsonBody)
+		}
+		req, err := http.NewRequest(val.Method, val.URL, buffer)
+		if err != nil {
+			fmt.Println("[Info] An error occurred while creating a new http request", err)
+			return nil, err
+		}
+		for headerKey, headerValue := range val.Header {
+			req.Header.Add(headerKey, headerValue)
+		}
+		val.request = req
+	}
+	return conf, nil
 }

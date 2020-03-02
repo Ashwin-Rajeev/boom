@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -23,6 +24,7 @@ var (
 	requestDurationInSeconds      int
 	requestBody                   string
 	requestTimeOut                int
+	multipleRequests              bool
 	help                          bool
 )
 
@@ -33,6 +35,7 @@ func init() {
 	flag.StringVar(&requestBody, "b", "", "Request body file name (Relative path)")
 	flag.IntVar(&requestDurationInSeconds, "d", 5, "Request duration")
 	flag.IntVar(&requestTimeOut, "to", 2000, "Request time out in seconds")
+	flag.BoolVar(&multipleRequests, "mul", false, "Use multiple request mode")
 	flag.BoolVar(&help, "help", false, "know more about the usage of boom")
 }
 
@@ -43,6 +46,13 @@ func main() {
 	if !flag.Parsed() {
 		log.Fatalln("[Info] Command line flags parsing failed, Please check the input")
 	}
+	if help {
+		fmt.Println("Usage: boom [<flags>] <url>")
+		flag.VisitAll(func(flag *flag.Flag) {
+			fmt.Println("\t-"+flag.Name, "\t", flag.Usage, "(Default value = "+flag.DefValue+")")
+		})
+		return
+	}
 	requestHeader = make(map[string]string)
 	if headerValues != "" {
 		hv := strings.Split(headerValues, ";")
@@ -51,37 +61,60 @@ func main() {
 			requestHeader[header[0]] = header[1]
 		}
 	}
-	if help {
-		fmt.Println("Usage: boom [<flags>] <url>")
-		flag.VisitAll(func(flag *flag.Flag) {
-			fmt.Println("\t-"+flag.Name, "\t", flag.Usage, "(Default value = "+flag.DefValue+")")
-		})
-		return
-	}
 
+	var requestParams = []*RequestParams{}
 	if len(requestBody) > 0 {
 		data, err := ioutil.ReadFile(requestBody)
 		if err != nil {
 			fmt.Println(fmt.Errorf("[Info] Could not read file %s: %s", requestBody, err.Error()))
 			os.Exit(1)
 		}
-		requestBody = string(data)
-	}
-	requestURL = flag.Arg(0)
+		if multipleRequests {
+			err = json.Unmarshal(data, &requestParams)
+			if err != nil {
+				log.Println(err)
+			}
 
-	if len(requestURL) == 0 {
-		log.Fatalln("[Info] Requested url is invalid, Please check the input")
+			for _, val := range requestParams {
+				s, err := json.Marshal(val.Body)
+				if err != nil {
+					log.Println(err)
+				}
+				val.jsonBody = string(s)
+			}
+		} else {
+			requestURL = flag.Arg(0)
+
+			if len(requestURL) == 0 {
+				log.Fatalln("[Info] Requested url is invalid, Please check the input")
+			}
+			reqParam := new(RequestParams)
+			reqParam.Body = string(data)
+			reqParam.URL = requestURL
+			reqParam.Method = requestMethod
+			reqParam.Header = requestHeader
+			requestParams = append(requestParams, reqParam)
+
+		}
+	} else {
+		requestURL = flag.Arg(0)
+
+		if len(requestURL) == 0 {
+			log.Fatalln("[Info] Requested url is invalid, Please check the input")
+		}
+		reqParam := new(RequestParams)
+		reqParam.URL = requestURL
+		reqParam.Method = requestMethod
+		reqParam.Header = requestHeader
+		requestParams = append(requestParams, reqParam)
 	}
 	staticsChan := make(chan *APIStatus, numberOfConcurrentConnections)
 	config := newAPIConfig(
 		numberOfConcurrentConnections,
-		requestURL,
-		requestMethod,
-		requestHeader,
 		requestDurationInSeconds,
-		requestBody,
 		requestTimeOut,
 		staticsChan,
+		requestParams,
 	)
 	fmt.Printf(" Boom running for %vs over the api: ", requestDurationInSeconds)
 	clr.Set(clr.FgGreen)

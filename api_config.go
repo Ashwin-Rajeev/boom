@@ -1,36 +1,34 @@
 package main
 
+import "net/http"
+
+// RequestParams for http request
+type RequestParams struct {
+	URL      string            `json:"url"`
+	Method   string            `json:"method"`
+	Header   map[string]string `json:"header"`
+	Body     interface{}       `json:"body"`
+	jsonBody string
+	request  *http.Request
+}
+
 // APIConfig which stores the api configuration
 type APIConfig struct {
-	ConcurrentConnections int
-	url                   string
-	method                string
-	header                map[string]string
+	concurrentConnections int
 	duration              int
-	body                  string
 	timeOut               int
 	finalStatus           chan *APIStatus
 	interrupt             int32
+	params                []*RequestParams
 }
 
-func newAPIConfig(
-	goroutines int,
-	url string,
-	method string,
-	header map[string]string,
-	duration int,
-	body string,
-	timeOut int,
-	finalStatusChan chan *APIStatus,
-) *APIConfig {
-	return &APIConfig{
-		ConcurrentConnections: goroutines,
-		url:                   url,
-		method:                method,
-		header:                header,
+func newAPIConfig(goroutines, duration, timeOut int, finalStatusChan chan *APIStatus, params []*RequestParams) *APIConfig {
+	a := &APIConfig{
+		concurrentConnections: goroutines,
 		duration:              duration,
-		body:                  body,
 		timeOut:               timeOut,
 		finalStatus:           finalStatusChan,
+		params:                params,
 	}
+	return a
 }
