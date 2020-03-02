@@ -1,5 +1,5 @@
 # Boom [![Build Status](https://travis-ci.com/Ashwin-Rajeev/boom.svg?branch=master)](https://travis-ci.com/Ashwin-Rajeev/boom) [![GoDoc](https://godoc.org/github.com/Ashwin-Rajeev/boom?status.svg)](https://godoc.org/github.com/Ashwin-Rajeev/boom) [![Go Report Card](https://goreportcard.com/badge/github.com/Ashwin-Rajeev/boom)](https://goreportcard.com/report/github.com/Ashwin-Rajeev/boom)
-Boom is a HTTP(S) benchmarking tool written in Golang. Because of its lightning fast performance uyou cane test any real world applications using this wnderfull benchmarking tool.
+Boom is a HTTP(S) benchmarking tool written in Golang. Because of its lightning fast performance you can test any real world applications using this wnderfull benchmarking tool.
 
 ### Coded With Language
 * [Golang](https://golang.org/)
