@@ -3,7 +3,6 @@ Boom is a HTTP(S) benchmarking tool written in Golang. Because of its lightning 
 
 ### Coded With Language
 * [Golang](https://golang.org/)
-* [Golang_developers](https://go.dev/)
 
 
 <!-- GETTING STARTED -->
