@@ -5,8 +5,7 @@ go:
   - master
 
 script:
-  - echo "Ensuring code is well formatted"; ! gofmt -s -d . | read
-  - go test -v -coverprofile=coverage.txt -covermode=atomic -tags matprofile .
+  - go test -race -coverprofile=coverage.txt -covermode=atomic
   
 after_success:
   - bash <(curl -s https://codecov.io/bash)
