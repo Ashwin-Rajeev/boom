@@ -142,7 +142,7 @@ sample_request.json
 ```
 ## Prerequisites
 
-Golang should be installed on your computer, boom is compatible with go1.10 and above
+Golang should be installed on your computer, boom is compatible with go1.12 and above
 
 
 <!-- ROADMAP -->
