@@ -1,4 +1,4 @@
-# Boom 
+<h1 align="center">Boom</h1> 
 <p align="center"><img src="https://github.com/Ashwin-Rajeev/docs/blob/master/images/boom-logo-small.png" alt="screenshot" style="max-width:100%;"></p>
 
 [![Build Status](https://travis-ci.com/Ashwin-Rajeev/boom.svg?branch=master)](https://travis-ci.com/Ashwin-Rajeev/boom) [![GoDoc](https://godoc.org/github.com/Ashwin-Rajeev/boom?status.svg)](https://godoc.org/github.com/Ashwin-Rajeev/boom) [![Go Report Card](https://goreportcard.com/badge/github.com/Ashwin-Rajeev/boom)](https://goreportcard.com/report/github.com/Ashwin-Rajeev/boom) [![codecov](https://codecov.io/gh/Ashwin-Rajeev/boom/branch/master/graph/badge.svg)](https://codecov.io/gh/Ashwin-Rajeev/boom) [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/Ashwin-Rajeev/boom/blob/master/LICENSE) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Ashwin-Rajeev/boom)
