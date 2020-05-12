@@ -121,7 +121,7 @@ sample_request.json
 [
     {
         "url": "http://www.sample.com",
-        "method": "GET",
+        "method": "PUT",
         "body": {
             "a": "1",
             "b": "2"
