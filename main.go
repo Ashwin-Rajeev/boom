@@ -34,8 +34,8 @@ func init() {
 	flag.StringVar(&headerValues, "h", "", "header values separated with ';'")
 	flag.StringVar(&requestBody, "b", "", "Request body file name (Relative path)")
 	flag.IntVar(&requestDurationInSeconds, "d", 5, "Request duration")
-	flag.IntVar(&requestTimeOut, "to", 2000, "Request time out in seconds")
-	flag.BoolVar(&multipleRequests, "mul", false, "Use multiple request mode")
+	flag.IntVar(&requestTimeOut, "to", 2000, "Request time out in milli seconds")
+	flag.BoolVar(&multipleRequests, "multi", false, "Use multiple request mode")
 	flag.BoolVar(&help, "help", false, "know more about the usage of boom")
 }
 
@@ -145,9 +145,9 @@ func main() {
 
 	minions := 0
 	statics := APIStatus{
-		TotalDuration:  time.Minute,
-		MinRequestTime: time.Minute,
-		MaxRequestTime: time.Minute,
+		TotalDuration:  time.Millisecond,
+		MinRequestTime: time.Millisecond,
+		MaxRequestTime: time.Millisecond,
 		StatusCodes:    &StatusCodes{},
 	}
 	for minions < numberOfConcurrentConnections {

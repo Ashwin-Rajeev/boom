@@ -15,8 +15,9 @@ import (
 func (conf *APIConfig) request() {
 
 	status := &APIStatus{
-		TotalDuration:  time.Minute,
-		MinRequestTime: time.Minute,
+		TotalDuration:  time.Millisecond,
+		MinRequestTime: time.Hour,
+		MaxRequestTime: time.Millisecond,
 		StatusCodes:    &StatusCodes{},
 	}
 	client, err := newHTTPClient(conf.timeOut)
@@ -66,7 +67,7 @@ func run(httpClient *http.Client, req *http.Request, s *APIStatus) (requestDurat
 		responseSize = len(body) + int(headerSize(resp.Header))
 		s.StatusCodes.TwoXX++
 	} else if resp.StatusCode == http.StatusContinue || resp.StatusCode == http.StatusSwitchingProtocols ||
-		resp.StatusCode == http.StatusProcessing || resp.StatusCode == http.StatusEarlyHints {
+		resp.StatusCode == http.StatusProcessing {
 		s.StatusCodes.OneXX++
 	} else if resp.StatusCode == http.StatusMultipleChoices || resp.StatusCode == http.StatusMovedPermanently ||
 		resp.StatusCode == http.StatusFound || resp.StatusCode == http.StatusSeeOther ||
