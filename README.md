@@ -30,8 +30,8 @@ Usage:  boom [<flags>] <url>
         -b       Request body file name (Relative path) (Default value = )
         -h       header values separated with ';' (Default value = )
         -m       Request method (Default value = GET)
-        -mul     Use multiple request mode (Default value = false)
-        -to      Request time out in seconds (Default value = 1000)
+        -multi     Use multiple request mode (Default value = false)
+        -to      Request time out in milli seconds (Default value = 1000)
 
 ```
 
